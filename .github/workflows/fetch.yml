@@ -2,7 +2,7 @@ name: Fetch Data
 
 on:
   schedule:
-    - cron: '0 */16 * * *'  # every 16 hours
+    - cron: '*/5 * * * *'  # every 5 minutes
   workflow_dispatch:          # lets you trigger manually too
 
 jobs:
