@@ -7,8 +7,8 @@ import os
 from supabase import create_client
 from datetime import datetime, timezone
 
-if not load_dotenv(".env"):
-    raise RuntimeError("Failed to load .env file")
+# Load .env when present (local dev), but don't fail in CI where vars come from env.
+load_dotenv(".env")
 
 def get_required_env(name: str) -> str:
     value = os.getenv(name)
