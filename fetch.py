@@ -70,7 +70,7 @@ def resolve_instrument_id(symbol: str) -> int:
 def fetch_candles(
     instrument_id: int,
     interval: str = "OneMinute",
-    candles_count: int = 100,
+    candles_count: int = 10,
     direction: str = "asc"
 ):
     """
