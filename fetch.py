@@ -7,18 +7,21 @@ import os
 from supabase import create_client
 from datetime import datetime, timezone
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-load_dotenv(ROOT_DIR / ".env")
+if not load_dotenv(".env"):
+    raise RuntimeError("Failed to load .env file")
 
 def get_required_env(name: str) -> str:
     value = os.getenv(name)
-    if value is None or not value.strip():
+    if value is None:
         raise ValueError(f"Missing required environment variable: {name}")
-    return value.strip()
+    value = value.strip()
+    if not value:
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
 
 supabase = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_KEY")
+    get_required_env("SUPABASE_URL"),
+    get_required_env("SUPABASE_KEY")
 )
 
 API_KEY = get_required_env("API_KEY")
@@ -64,35 +67,6 @@ def resolve_instrument_id(symbol: str) -> int:
 
     return instrument["instrumentId"]
 
-# ==============================
-# Fetch Rates
-# ==============================
-
-def fetch_rates(instrument_id: int):
-    url = f"{BASE_URL}/market-data/instruments/rates"
-
-    headers = {
-        "x-request-id": str(uuid.uuid4()),
-        "x-api-key": API_KEY,
-        "x-user-key": USER_KEY,
-    }
-
-    params = {
-        "instrumentIds": instrument_id,
-    }
-
-    response = requests.get(url, headers=headers, params=params)
-
-    if response.status_code != 200:
-        raise RuntimeError(f"Error fetching rates: {response.text}")
-
-    data = response.json()
-    return data["rates"][0]
-
-# ==============================
-# Fetch Historical Candles
-# ==============================
-
 def fetch_candles(
     instrument_id: int,
     interval: str = "OneMinute",
@@ -137,7 +111,6 @@ def fetch_candles(
     instrument_block = data["candles"][0]
     candles = instrument_block["candles"]
     return candles
-
 
 def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
     """Insert each candle as a separate row in Supabase."""
