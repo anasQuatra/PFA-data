@@ -20,8 +20,8 @@ def get_required_env(name: str) -> str:
     return value
 
 supabase = create_client(
-    get_required_env("SUPABASE_URL"),
-    get_required_env("SUPABASE_KEY")
+    supabase_url=get_required_env("SUPABASE_URL"),
+    supabase_key=get_required_env("SUPABASE_KEY")
 )
 
 API_KEY = get_required_env("API_KEY")
