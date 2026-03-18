@@ -121,12 +121,12 @@ def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
 
 if __name__ == "__main__":
 
-    # symbol = "AAPL"   # "BTC", "ETH", "TSLA"
-    # instrument_id = resolve_instrument_id(symbol)
-    # candles_payload = fetch_candles(instrument_id,candles_count=10)
+    symbol = "BTC"   # "BTC", "ETH", "TSLA"
+    instrument_id = resolve_instrument_id(symbol)
+    candles_payload = fetch_candles(instrument_id,candles_count=15)
     
-    binance = BinanceDataFetcher()
-    candles_payload = binance.get_klines(interval="1m", limit=30)
+    # binance = BinanceDataFetcher()
+    # candles_payload = binance.get_klines(interval="1m", limit=30)
     
     inserted_count = insert_candles(candles_payload)
     print(f"Inserted {inserted_count} candles into 'fetches'.")
