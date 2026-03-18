@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     for symbol in symbols:
         instrument_id = resolve_instrument_id(symbol)
-        candles_payload = fetch_candles(instrument_id, candles_count=30)
+        candles_payload = fetch_candles(instrument_id, candles_count=15)
 
         table_name = f"fetches_{symbol.lower()}"
         inserted_count = insert_candles(candles_payload, table_name=table_name)
