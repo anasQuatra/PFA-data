@@ -2,9 +2,7 @@ import requests
 import uuid
 import os
 from dotenv import load_dotenv
-import os
-from supabase import create_client  
-from BinanceDataFetcher import BinanceDataFetcher
+from supabase import create_client
 
 # Load .env when present (local dev), but don't fail in CI where vars come from env.
 load_dotenv(".env")
@@ -120,13 +118,12 @@ def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
     return inserted
 
 if __name__ == "__main__":
+    symbols = ["BTC","ETH", "XRP", "BNB", "SOL"]
 
-    symbol = "BTC"   # "BTC", "ETH", "TSLA"
-    instrument_id = resolve_instrument_id(symbol)
-    candles_payload = fetch_candles(instrument_id,candles_count=15)
-    
-    # binance = BinanceDataFetcher()
-    # candles_payload = binance.get_klines(interval="1m", limit=30)
-    
-    inserted_count = insert_candles(candles_payload)
-    print(f"Inserted {inserted_count} candles into 'fetches'.")
+    for symbol in symbols:
+        instrument_id = resolve_instrument_id(symbol)
+        candles_payload = fetch_candles(instrument_id, candles_count=30)
+
+        table_name = f"fetches_{symbol.lower()}"
+        inserted_count = insert_candles(candles_payload, table_name=table_name)
+        print(f"Inserted {inserted_count} candles for {symbol} into '{table_name}'.")
