@@ -2,3 +2,5 @@
 requests
 python-dotenv
 supabase
+python-binance
+pandas
