@@ -112,8 +112,10 @@ def fetch_candles(
 def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
     """Insert each candle as a separate row in Supabase."""
     inserted = 0
+    res = []
     for candle in candles:
-        supabase.table(table_name).insert({"payload": candle}).execute()
+        r = supabase.table(table_name).insert({"payload": candle}).execute()
+        res.append(r)
         inserted += 1
     return inserted
 
