@@ -117,6 +117,7 @@ def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
         r = supabase.table(table_name).insert({"payload": candle}).execute()
         res.append(r)
         inserted += 1
+    print(res)
     return inserted
 
 if __name__ == "__main__":
