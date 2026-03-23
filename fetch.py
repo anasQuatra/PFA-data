@@ -1,3 +1,5 @@
+import time
+
 import requests
 import uuid
 import os
@@ -99,8 +101,18 @@ def fetch_candles(
         "x-user-key": USER_KEY,
     }
 
-    response = requests.get(url, headers=headers)
-
+    retries = 3
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+        except requests.exceptions.SSLError as e:
+            if attempt < retries - 1:
+                print(f"SSL error, retrying in 5s... ({attempt + 1}/{retries})")
+                time.sleep(5)
+            else:
+                raise e
+            
     if response.status_code != 200:
         raise RuntimeError(f"Error fetching candles: {response.text}")
 
@@ -122,8 +134,8 @@ if __name__ == "__main__":
 
     for symbol in symbols:
         instrument_id = resolve_instrument_id(symbol)
-        candles_payload = fetch_candles(instrument_id, candles_count=15)
-
+        candles_payload = fetch_candles(instrument_id, candles_count=450)
+        print(f"Fetched {len(candles_payload)} candles for {symbol} (instrument ID: {instrument_id}).")
         table_name = f"fetches_{symbol.lower()}"
-        inserted_count = insert_candles(candles_payload, table_name=table_name)
-        print(f"Inserted {inserted_count} candles for {symbol} into '{table_name}'.")
+        # inserted_count = insert_candles(candles_payload, table_name=table_name)
+        # print(f"Inserted {inserted_count} candles for {symbol} into '{table_name}'.")
