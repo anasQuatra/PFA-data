@@ -121,15 +121,45 @@ def fetch_candles(
     candles = instrument_block["candles"]
     return candles
 
+def get_last_from_date(table_name: str):
+    result = (
+        supabase.table(table_name)
+        .select("payload")
+        .order("id", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if result.data and isinstance(result.data[0], dict):
+        payload = result.data[0].get("payload") or {}
+        if isinstance(payload, dict):
+            return payload.get("fromDate")
+    return None
+
 def insert_candles(candles: list[dict], table_name: str = "fetches") -> int:
     """Insert each candle as a separate row in Supabase."""
     inserted = 0
-    res = []
-    for candle in candles:
-        r = supabase.table(table_name).insert({"payload": candle}).execute()
-        res.append(r)
+    filtered_candles = candles
+
+    # Safety: if we cannot read the last stored fromDate, continue with full upload.
+    try:
+        last_from_date = get_last_from_date(table_name)
+    except Exception as e:
+        print(f"Warning: failed to get last fromDate for {table_name}: {e}. Uploading all candles.")
+        last_from_date = None
+
+    if last_from_date is not None:
+        filtered_candles = [
+            candle for candle in candles
+            if candle.get("fromDate") is None or str(candle.get("fromDate")) > str(last_from_date)
+        ]
+
+    for candle in filtered_candles:
+        if last_from_date is not None and candle.get("fromDate") is not None:
+            if str(candle.get("fromDate")) <= str(last_from_date):
+                continue
+        supabase.table(table_name).insert({"payload": candle}).execute()
         inserted += 1
-    print(res)
+
     return inserted
 
 if __name__ == "__main__":
